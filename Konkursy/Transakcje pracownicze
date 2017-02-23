@@ -1,0 +1,65 @@
+Sub getNames()
+
+Dim cellRow As Integer
+cellRow = 2
+
+Dim arr() As String
+Dim names() As String
+
+Dim namesCounter As Integer
+namesCounter = 0
+
+Dim transactionCounter As Integer
+transactionCounter = 0
+
+Dim isEmployeeTransaction As Boolean
+isEmployeeTransaction = False
+
+Dim employee As String
+
+Do While Cells(cellRow, 1) <> ""
+    arr = Split(Cells(cellRow, 1), " ")
+
+    If arr(0) = "Użytkownik:" Then
+        employee = arr(1) & " " & arr(2)
+
+        If namesCounter = 0 Then
+            ReDim Preserve names(0 To namesCounter + 1)
+            names(namesCounter) = employee
+
+            Cells(namesCounter + 1, 15) = names(namesCounter)
+            namesCounter = namesCounter + 1
+            cellRow = cellRow + 1
+
+        ElseIf names(namesCounter - 1) <> employee Then
+            Cells(namesCounter, 17) = transactionCounter
+            transactionCounter = 0
+            ReDim Preserve names(0 To namesCounter + 1)
+            names(namesCounter) = employee
+
+            Cells(namesCounter + 1, 15) = names(namesCounter)
+            namesCounter = namesCounter + 1
+            cellRow = cellRow + 1
+        End If
+    End If
+    
+    cellRow = cellRow + 1
+
+    Do While Cells(cellRow, 1) <> "Podsumowanie transakcji nr:" And Cells(cellRow, 1) <> ""
+        
+        If InStr(Cells(cellRow, 2), "PRACOWNIK") > 0 Then
+            isEmployeeTransaction = True
+        End If
+            cellRow = cellRow + 1
+    Loop
+
+    If isEmployeeTransaction Then
+        transactionCounter = transactionCounter + 1
+    End If
+
+    Erase arr
+    cellRow = cellRow + 1
+    isEmployeeTransaction = False
+Loop
+Cells(namesCounter, 17) = transactionCounter
+End Sub
