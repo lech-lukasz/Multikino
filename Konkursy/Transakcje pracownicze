@@ -1,65 +1,91 @@
-Sub getNames()
-
-Dim cellRow As Integer
-cellRow = 2
-
-Dim arr() As String
-Dim names() As String
-
-Dim namesCounter As Integer
-namesCounter = 0
-
-Dim transactionCounter As Integer
-transactionCounter = 0
-
-Dim isEmployeeTransaction As Boolean
-isEmployeeTransaction = False
-
-Dim employee As String
-
-Do While Cells(cellRow, 1) <> ""
-    arr = Split(Cells(cellRow, 1), " ")
-
-    If arr(0) = "Użytkownik:" Then
-        employee = arr(1) & " " & arr(2)
-
-        If namesCounter = 0 Then
-            ReDim Preserve names(0 To namesCounter + 1)
-            names(namesCounter) = employee
-
-            Cells(namesCounter + 1, 15) = names(namesCounter)
-            namesCounter = namesCounter + 1
-            cellRow = cellRow + 1
-
-        ElseIf names(namesCounter - 1) <> employee Then
-            Cells(namesCounter, 17) = transactionCounter
-            transactionCounter = 0
-            ReDim Preserve names(0 To namesCounter + 1)
-            names(namesCounter) = employee
-
-            Cells(namesCounter + 1, 15) = names(namesCounter)
-            namesCounter = namesCounter + 1
-            cellRow = cellRow + 1
-        End If
+Sub count()
+    Dim fNameAndPath As Variant
+    fNameAndPath = Application.GetOpenFilename(FileFilter:="XLS", Title:="Wybierz raport")
+    If fNameAndPath = False Then 
+        Exit Sub
+        Msgbox("Czy to serio było aż takie trudne?")
     End If
     
-    cellRow = cellRow + 1
-
-    Do While Cells(cellRow, 1) <> "Podsumowanie transakcji nr:" And Cells(cellRow, 1) <> ""
-        
-        If InStr(Cells(cellRow, 2), "PRACOWNIK") > 0 Then
-            isEmployeeTransaction = True
-        End If
-            cellRow = cellRow + 1
-    Loop
-
-    If isEmployeeTransaction Then
-        transactionCounter = transactionCounter + 1
-    End If
-
-    Erase arr
-    cellRow = cellRow + 1
+    Sheets.Add (Type:=fNameAndPath).Name = "RAPORT"
+    
+    Dim cellRow As Integer
+    cellRow = 2
+    
+    Dim firstnameCol As Integer
+    firstnameCol = 2    
+    
+    Dim lastnameCol As Integer
+    lastnameCol = 3
+    
+    Dim transactionCol As Integer
+    transactionCol = 4
+    
+    Dim arr() As String
+    Dim names() As String
+    
+    Dim namesCounter As Integer
+    namesCounter = 0
+    
+    Dim transactionCounter As Integer
+    transactionCounter = 0
+    
+    Dim isEmployeeTransaction As Boolean
     isEmployeeTransaction = False
-Loop
-Cells(namesCounter, 17) = transactionCounter
+    
+    Dim employee As String
+    
+    Do While Worksheets("RAPORT").Cells(cellRow, 1) <> ""
+        arr = Split(Worksheets("RAPORT").Cells(cellRow, 1), " ")
+        
+        If arr(0) = "Użytkownik:" Then
+            employee = arr(2) & " " & arr(1)
+            
+            If namesCounter = 0 Then
+                ReDim Preserve names(0 To namesCounter + 1)
+                names(namesCounter) = employee
+                
+
+                Worksheets("PRACOWNICZE").Cells(namesCounter + 5, firstnameCol) = arr(2)
+                Worksheets("PRACOWNICZE").Cells(namesCounter + 5, lastnameCol) = arr(1)
+                namesCounter = namesCounter + 1
+                cellRow = cellRow + 1
+                
+            ElseIf names(namesCounter - 1) <> employee Then
+                Worksheets("PRACOWNICZE").Cells(namesCounter + 4, transactionCol) = transactionCounter
+                transactionCounter = 0
+                ReDim Preserve names(0 To namesCounter + 1)
+                names(namesCounter) = employee
+                
+                Worksheets("PRACOWNICZE").Cells(namesCounter + 5, firstnameCol) = arr(2)
+                Worksheets("PRACOWNICZE").Cells(namesCounter + 5, lastnameCol) = arr(1)
+                namesCounter = namesCounter + 1
+                cellRow = cellRow + 1
+            End If
+        End If
+        
+        cellRow = cellRow + 1
+        
+        
+        Do While Worksheets("RAPORT").Cells(cellRow, 1) <> "Podsumowanie transakcji nr:" And Worksheets("RAPORT").Cells(cellRow, 1) <> ""
+            
+            If InStr(Worksheets("RAPORT").Cells(cellRow, 2), "PRACOWNIK") > 0 Then
+                isEmployeeTransaction = True
+            End If
+            cellRow = cellRow + 1
+        Loop
+        
+        If isEmployeeTransaction Then
+            transactionCounter = transactionCounter + 1
+        End If
+        
+        Erase arr
+        cellRow = cellRow + 1
+        isEmployeeTransaction = False
+    Loop
+    Worksheets("PRACOWNICZE").Cells(namesCounter + 4, transactionCol) = transactionCounter
+    Worksheets("PRACOWNICZE").Activate
+    Application.DisplayAlerts = FALSE
+    Worksheets("RAPORT").Delete
+    Application.DisplayAlerts = TRUE
 End Sub
+
