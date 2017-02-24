@@ -5,6 +5,8 @@
 /node_modules/
 /Grafik/Grafik.xlsx
 /Grafik/~$Grafik.xlsx
+/Grafik/client_secret.json
+/Grafik/schedule.json
 /Konkursy/wyniki.xlsm
 /Konkursy/~$wyniki.xlsm
 /Konkursy/ciocio.xls
