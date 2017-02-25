@@ -26,16 +26,27 @@ function searchRowNumberForEmployee(startingRowNumber, employeeName) {
     return rowNumber;
 }
 
-function dateParser(dateToParse) {
+function dateParser(dateToParse, startTime, endTime) {
     var date = dateToParse.toString().split("/");
 
     var day = date[1];
-    var month = date[0];
+    var month = date[0] - 1;
     var year = "20" + date[2];
 
-    var parsedDate = year + "-" + month + "-" + day;
+    var start = startTime.toString().split(":");
+    var end = endTime.toString().split(":");
 
-    return parsedDate;
+    if (parseInt(start[0]) > parseInt(end[0])) {
+        var endDate = new Date(Date.UTC(year, month, parseInt(day) + 1, parseInt(end[0]) - 1, end[1]));
+    } else {
+        var endDate = new Date(Date.UTC(year, month, day, parseInt(end[0]) - 1, end[1]));
+    }
+
+    var startDate = new Date(Date.UTC(year, month, day, parseInt(start[0]) - 1, start[1]));
+
+    var dates = [startDate, endDate];
+
+    return dates;
 }
 
 var rowNumberForEmployee = searchRowNumberForEmployee(stringRowNumber, "LEC")
@@ -50,19 +61,20 @@ while (scheduleCol < "Y") {
 
         scheduleCol = nextChar(scheduleCol, 1);
 
-        var date = dateParser(worksheet[scheduleCol + String(dateRow)].w);
+        var date = worksheet[scheduleCol + String(dateRow)].w;
 
-        var startTime = worksheet[scheduleCol + rowNumberForEmployee].w + ":00";
+        var startTime = worksheet[scheduleCol + rowNumberForEmployee].w;
+        scheduleCol = nextChar(scheduleCol, 1);
+        var endTime = worksheet[scheduleCol + rowNumberForEmployee].w;
+
+        var parsedDate = dateParser(date, startTime, endTime);
+
         event.start = new Object();
-        event.start.dateTime = date + "T" + startTime;
+        event.start.dateTime = parsedDate[0];
         event.start.timeZone = "Europe/Warsaw";
 
-
-        scheduleCol = nextChar(scheduleCol, 1);
-
-        var endTime = worksheet[scheduleCol + rowNumberForEmployee].w + ":00";
         event.end = new Object();
-        event.end.dateTime = date + "T" + endTime;
+        event.end.dateTime = parsedDate[1];
         event.end.timeZone = "Europe/Warsaw";
 
         scheduleCol = nextChar(scheduleCol, 1);
